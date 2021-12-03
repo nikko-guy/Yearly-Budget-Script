@@ -13,46 +13,7 @@ var normalText = SpreadsheetApp.newTextStyle().setBold(false).setFontFamily("Lat
 
 function run() {
   //reloadPrivacyTransactions();
-  function getAppsScriptContent() {
-    var accessTkn,id,options,projectID,response,url,versionNumber;
-    
-    id = "1rMf9_9jCypYC2TGrN2AqIxuwRvcd8QnxV7bywmaV7VmZx4sECjNTVwRp";//Enter the project id here
-    
-    url = "https://script.googleapis.com/v1/projects/{scriptId}/content";
-    url = url.replace("{scriptId}", id);
-    
-    if (versionNumber) {
-      url = url + '?versionNumber=' + versionNumber;
-    }
-    
-    accessTkn = ScriptApp.getOAuthToken();
-    
-    options = {};
-    options.muteHttpExceptions = true;//Make sure this is always set
-    options.method = "GET";
-    
-    options.headers = {
-      'Authorization': 'Bearer ' +  accessTkn
-    }
-    
-    response = UrlFetchApp.fetch(url,options);
-    
-    if (!response || response .getResponseCode() !== 200) {   
-      //Your error handling
-    }
-    
-    var fileContent = response.getContentText();
-    
-    try{
-      fileContent = JSON.parse(fileContent);
-      files = fileContent.files;
-    }catch(e){
-      
-      //Error handling
-    }
-    return files;
-  }
-  var t = getAppsScriptContent();
+  log("hello");
   debugger;
 }
 
