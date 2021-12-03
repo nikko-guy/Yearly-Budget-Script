@@ -1,0 +1,2 @@
+loadServices();
+generateFlagFunctions();
