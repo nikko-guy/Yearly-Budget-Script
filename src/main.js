@@ -1,10 +1,5 @@
-function run() {
-  //reloadPrivacyTransactions();
-  log("hello");
-  debugger;
-}
-
-function test() {
+function debug(){
+  run();
 }
 
 function onEdit() {
@@ -114,7 +109,7 @@ function importData() {
     }
 
     rawTArray[i] = t;
-    rawValArray = [date, description, amount, t.uuid]
+    rawValArray[i] = [date, description, amount, t.uuid]
   }
 
   //Apply privacy.com names to transactions
@@ -124,7 +119,7 @@ function importData() {
     var description = privacyNames[j];
     var i = privacyList["i"][j];
     var t = rawTArray[i];
-    var v = rawValArray[t.type][i];
+    var v = rawValArray[i];
 
     t.description = description;
     v[1] = description;

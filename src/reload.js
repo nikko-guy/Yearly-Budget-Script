@@ -137,6 +137,7 @@ function reloadHeaderRows() {
 
 function reloadPrivacyTransactions(){
   privacyTransactions = [];
+  ptNameList = [];
   log("Reloading Privacy Transactions");
 
   var sheet = spreadsheet.getSheetByName("Privacy.com Data");
@@ -148,16 +149,21 @@ function reloadPrivacyTransactions(){
   var dateRange = sheet.getRange("A2:A"+lastRow)
   var dates = dateRange.getValues();
   dates = dates.map(function(a){
-    return [a[0].substring(0,10)];
+    if(typeof a == "string") return [a[0].substring(0,10)];
+    else return a;
   });
 
   //Paste fixed date values and format them
   dateRange.setValues(dates).setNumberFormat("m/d/yy");
 
-  //Create the PrivacyTransactionObject s
-  sheet.getRange("A2:C"+lastRow).getValues().map(function(v){
-    privacyTransactions.push(new PrivacyTransactionObject(v));
-  });
+  //Create and add each PrivacyTransactionObject to Array
+  var vals = sheet.getRange("A2:C"+lastRow).getValues();
+
+  for(var i = vals.length-1;i>=0;i--){
+    var v = vals[i];
+    privacyTransactions.push(new PrivacyTransactionObject(v[0],v[1],v[2]));
+    ptNameList.push([v[2]]);
+  }
 
   log("Finished reloading Privacy Transactions");
   return privacyTransactions;

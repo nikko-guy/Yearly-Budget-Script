@@ -188,6 +188,9 @@ function addToFlag(flag, transactionList) {
 
   //Add transactions to flag object
   for (var i = 0; i < transactionList.length; i++) {
+    //TODO
+    //check if transaction already exists in flag
+
     flags[flag].push(transactionList[i]);
   }
 
@@ -209,28 +212,41 @@ function reloadFlagMenu() {
   var ui = SpreadsheetApp.getUi();
 
   var flagMenu = ui.createMenu('Flag');
-  var flagSubMenu = ui.createMenu('Add to Flag');
+  var addToFlagSubMenu = ui.createMenu('Add to Flag');
+  var removeFromFlagSubMenu = ui.createMenu("Remove From Flag");
 
   generateFlagFunctions();
 
   Object.keys(flags).forEach(function (flag) {
-    flagSubMenu.addItem(flag, flag);
+    addToFlagSubMenu.addItem(flag, "add"+flag);
+    removeFromFlagSubMenu.addItem(flag,"remove"+flag)
   });
 
   if (Object.keys(flags).length > 0) {
-    flagMenu.addSubMenu(flagSubMenu);
-    flagMenu.addSeparator();
+    flagMenu.addSubMenu(addToFlagSubMenu)
+      .addSubMenu(removeFromFlagSubMenu)
+      .addSeparator()
   }
 
-  flagMenu.addItem("Reload Flags", "reloadFlagMenu");
+  flagMenu.addItem("Reload Flags", "reloadFlagMenu")
+    .addItem("Create Flag","createFlagInteract")
+    .addItem("Delete Flag","deleteFlagInteract")
   flagMenu.addToUi();
 }
 
 function generateFlagFunctions() {
   Object.keys(flags).forEach(function (flag) {
-    this[flag] = function () {
+    this["add"+flag] = function () {
       try {
         addToFlagInteract(flag);
+      }
+      catch (e) {
+        log(e);
+      }
+    }
+    this["remove"+flag] = function () {
+      try {
+        removeFromFlagInteract(flag);
       }
       catch (e) {
         log(e);

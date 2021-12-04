@@ -1,5 +1,8 @@
-var privacyTransactions = [];
 var ptNameList = [];
+
+function debug(){
+  run();
+}
 
 var PrivacyTransactionObject = function(date,amount,description){
   this.date = date;
@@ -23,6 +26,8 @@ function getPrivacyNames(transactionList){
   if(privacyTransactions.length==transactionList.length&&ptIsT(pt1,t1)&&ptIsT(pt2,t2)){
     return ptNameList;
   }
+
+  //Not Easy stuff
 }
 
 /**
