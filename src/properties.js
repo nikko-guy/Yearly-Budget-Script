@@ -124,7 +124,7 @@ function getCommonNameProperties() {
   }
   catch (e) {
     log("Failed to load CommonNames from PropertiesService", true);
-    log(e, true);
+    log(e.stack, true);
   }
   return final;
 }
@@ -167,7 +167,7 @@ function getTransactionProperties() {
   }
   catch (e) {
     log("Failed to load Transactions from PropertiesService", true);
-    log(e, true);
+    log(e.stack, true);
   }
   return final;
 }
@@ -210,7 +210,9 @@ function getFlagProperties() {
       var transactionList = [];
 
       for (var j = 0; j < transactionPhraseList.length; j++) {
-        transactionList.push(toTransaction(transactionPhraseList[j]));
+        var t = transactionPhraseList[j];
+        if(isEmpty(t) || isBlank(t)) continue;
+        transactionList.push(toTransaction(t));
       }
 
       final[key] = transactionList;
@@ -220,7 +222,7 @@ function getFlagProperties() {
   }
   catch (e) {
     log("Failed to load Flags from PropertiesService", true);
-    log(e, true);
+    log(e.stack, true);
   }
   return final;
 }
@@ -263,7 +265,7 @@ function getHeaderRowProperties() {
   }
   catch (e) {
     log("Failed to load Header Rows from PropertiesService", true);
-    log(e, true);
+    log(e.stack, true);
   }
   return final;
 }

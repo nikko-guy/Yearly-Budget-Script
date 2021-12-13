@@ -183,7 +183,7 @@ function importData() {
   for (var i = 0; i < vals.length; i++) {
     //get data for transaction
     var date = vals[i][0];
-    var month = new Date(date.getTime() + (7 * 60 * 60 * 1000)).getMonth();
+    var month = Number.parseInt(Utilities.formatDate(date,"GMT","M"))-1;
     var amount = vals[i][2];
     var description = vals[i][1];
     var uuid = vals[i][3];

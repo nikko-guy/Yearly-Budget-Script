@@ -13,7 +13,7 @@ var normalText = SpreadsheetApp.newTextStyle().setBold(false).setFontFamily("Lat
   .setItalic(false).setStrikethrough(false).setUnderline(false).setBold(false).build();
 
 function run() {
-  importData();
+  saveInvoicePDF(generateInvoice(flags["test"]));
   debugger;
 }
 

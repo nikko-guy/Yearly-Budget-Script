@@ -92,7 +92,7 @@ function addTransactionsByMonth(type, month, transactionList) {
     var row = topRow + 1 + i;
     var transaction = transactionList[i];
     var uuid = transaction.uuid;
-    var date = new Date(transaction.date.getTime() + (7 * 60 * 60 * 1000));
+    var date = Utilities.formatDate(transaction.date,"GMT","MM/dd/yyyy");
     var amount = transaction.amount;
     var description = transaction.description;
     var category = "";
@@ -165,7 +165,7 @@ function addOriginalNames(transactionList) {
 function addTransaction(transaction) {
   var t = transaction.type;
   transactions[transaction.uuid] = transaction;
-  var date = new Date(transaction.date.getTime() + (7 * 60 * 60 * 1000));
+  var date = Utilities.formatDate(transaction.date,"GMT","MM/dd/yyyy");
   var month = date.getMonth();
   var row = headerRows[t.NAME][month] + 1;
   var sheet = t.SHEET;

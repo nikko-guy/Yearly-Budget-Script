@@ -28,20 +28,24 @@ function incrementHeaderRows(type, month, amount = 1) {
 }
 
 /**
- * Adds rows to bottom of spreadsheet, returns range of added rows
+ * Adds rows to bottom of spreadsheet
  * @param {SpreadsheetApp.Sheet} sheet
- * @param {Number} n
- * @return {SpreadsheetApp.Range}
+ * @param {Number} n number of rows to add
+ * @param {Number} start Optional variable to specify startRow
+ * @return {SpreadsheetApp.Range} range of added rows
  */
-function addRows(sheet, n) {
+function addRows(sheet, n, start = null) {
   var lastRow = sheet.getMaxRows();
-  var startRow = getEmptyRow(sheet, "A1:A", 1);
-  var endRow = startRow + n;
+  var startRow = sheet.getLastRow()+1;
+  if(start) startRow = start;
+  var endRow = startRow + n-1;
+
+  log(endRow);
 
   if (lastRow < endRow) sheet.insertRowsAfter(lastRow, endRow - lastRow);
   else if (lastRow > endRow) sheet.deleteRows(endRow + 1, lastRow - endRow);
 
-  return sheet.getRange("A" + startRow + ":" + (endRow - 1));
+  return sheet.getRange(startRow + ":" + endRow);
 }
 
 /**

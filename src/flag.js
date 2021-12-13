@@ -7,7 +7,8 @@ function debug() {
  * @param {String} flag flag to search
  */
 function showTransactionsWithFlag(flag) {
-  log("Flags: " + flags);
+  if(!flag) return;
+  log("Flags: " +JSON.stringify(flags));
   log("Showing Transactions with flag: " + flag);
   var sheet = spreadsheet.getSheetByName("Flagged Transactions");
   var emptyRow = getEmptyRow(sheet, "C5:C", 5);
@@ -54,26 +55,22 @@ function showTransactionsWithFlag(flag) {
   }
 
   //Add/Delete Rows
-  var lastRow = sheet.getMaxRows();
-  var endRow = 4 + descriptionArray.length;
+  var endRow = addRows(sheet,descriptionArray.length,5).getLastRow();
 
-  if (lastRow < endRow) sheet.insertRowsAfter(lastRow, endRow - lastRow);
-  else if (lastRow > endRow) sheet.deleteRows(endRow + 1, lastRow - endRow);
+  log(endRow);
 
   //Paste Values and format cells
 
-  var range;
+  sheet.getRange("A5:A" + endRow)
+    .setValues(dateArray);
 
-  range = sheet.getRange("A5:A" + endRow);
-  range.setValues(dateArray);
+  sheet.getRange("B5:B" + endRow)
+    .setValues(amountArray);
 
-  range = sheet.getRange("B5:B" + endRow);
-  range.setValues(amountArray);
+  sheet.getRange("C5:C" + endRow)
+    .setRichTextValues(descriptionArray);
 
-  range = sheet.getRange("C5:C" + endRow);
-  range.setRichTextValues(descriptionArray);
-
-  range = sheet.getRange("A5:C" + endRow);
+  var range = sheet.getRange("A5:C" + endRow);
   //range.setRichTextValues(richTextArray)
   range.setNumberFormats(formatArray)
     .setTextStyle(normalText);
@@ -86,7 +83,6 @@ function showTransactionsWithFlag(flag) {
  * @param {String} flag Flag to add transaction(s) to
  */
 function addToFlagInteract(flag) {
-  reloadAll();
   ui = SpreadsheetApp.getUi();
   var sheet = spreadsheet.getActiveSheet();
   var transactionList = [];
@@ -188,10 +184,19 @@ function addToFlag(flag, transactionList) {
 
   //Add transactions to flag object
   for (var i = 0; i < transactionList.length; i++) {
-    //TODO
-    //check if transaction already exists in flag
 
-    flags[flag].push(transactionList[i]);
+    //check if transaction already exists in flag
+    var duplicate = false;
+    for(var j in flags[flag]){
+      var t = flags[flag][j];
+      if(t.uuid == transactionList[i].uuid){
+        duplicate = true;
+        log("Transaction "+t.uuid+" was not added to the flag because it is already part of the flag.");
+        break;
+      }
+    }
+
+    if(!duplicate) flags[flag].push(transactionList[i]);
   }
 
   //Generate list of UUIDs for sheet
@@ -204,6 +209,8 @@ function addToFlag(flag, transactionList) {
   var list = uuidList.join(',');
   sheet.getRange("B" + row).setValue(list);
   log("Added transaction(s) to flag " + flag);
+
+  saveFlagProperties();
 
   return flags[flag];
 }
@@ -241,7 +248,7 @@ function generateFlagFunctions() {
         addToFlagInteract(flag);
       }
       catch (e) {
-        log(e);
+        log(e.stack);
       }
     }
     this["remove"+flag] = function () {
@@ -249,7 +256,7 @@ function generateFlagFunctions() {
         removeFromFlagInteract(flag);
       }
       catch (e) {
-        log(e);
+        log(e.stack);
       }
     }
   });
