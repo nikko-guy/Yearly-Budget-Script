@@ -24,6 +24,14 @@ const property = {
   FLAG: {
     KEY: "flagKeysList",
     VALUE: "flagValuesList"
+  },
+  CATEGORY: {
+    INCOME: {
+      VALUE: "incomeCategoryValuesList"
+    },
+    EXPENSE: {
+      VALUE: "expenseCategoryValuesList"
+    }
   }
 }
 
@@ -32,7 +40,9 @@ const splitters = {
   SUBPROPERTY: '¡',
   TRANSACTION: 'º',
   COMMONNAME: '®',
-  TRANASCTIONUUIDLIST: '©'
+  TRANASCTIONUUIDLIST: '©',
+  CATEGORY: 'Ω',
+  SUBCATEGORY: 'Λ'
 }
 
 function loadServices() {
@@ -55,6 +65,7 @@ function getServices() {
   var commonNames = getCommonNameProperties();
   var transactions = getTransactionProperties();
   var flags = getFlagProperties();
+  var categories = getCategoryProperties();
   log("Load complete");
   return { "headerRows": headerRows, "commonNames": commonNames, "transactions": transactions, "flags": flags };
 }
@@ -66,6 +77,7 @@ function saveServices() {
   saveCommonNameProperties();
   saveTransactionProperties();
   saveFlagProperties();
+  saveCategoryProperties();
   log("Save complete");
 }
 
@@ -173,6 +185,57 @@ function getTransactionProperties() {
 }
 
 /**
+ * 
+ */
+function saveCategoryProperties() {
+  log("Saving Categories to PropertiesService");
+  function f(type) {
+    var valuesList = [];
+    for (var i in categories[type.NAME]) {
+      valuesList.push(categories[type.NAME][i]);
+    }
+    return valuesList.join(splitters.PROPERTY);
+  }
+  var incomeStrings = f(TransactionType.INCOME);
+  var expenseStrings = f(TransactionType.EXPENSE);
+  PropertiesService.getDocumentProperties().setProperty(property.CATEGORY.INCOME.VALUE, incomeStrings);
+  PropertiesService.getDocumentProperties().setProperty(property.CATEGORY.EXPENSE.VALUE, expenseStrings);
+  log("Saved Categories to PropertiesService");
+}
+
+/**
+ * @return {}
+ */
+function getCategoryProperties() {
+  log("Loading Categories from PropertiesService");
+  var final = {};
+  try {
+    var incomeStrings = properties[property.CATEGORY.INCOME.VALUE].split(splitters.PROPERTY);
+    var expenseStrings = properties[property.CATEGORY.EXPENSE.VALUE].split(splitters.PROPERTY);
+
+    final[TransactionType.INCOME.NAME] = [];
+    final[TransactionType.EXPENSE.NAME] = [];
+    for (var i = 0; i < incomeStrings.length; i++) {
+      var value = toCategory(incomeStrings[i]);
+
+      final[TransactionType.INCOME.NAME].push(value);
+    }
+    for (var i = 0; i < expenseStrings.length; i++) {
+      var value = toCategory(expenseStrings[i]);
+
+      final[TransactionType.EXPENSE.NAME].push(value);
+    }
+
+    log("Loaded Categories from PropertiesService");
+  }
+  catch (e) {
+    log("Failed to load Categories from PropertiesService", true);
+    log(e.stack, true);
+  }
+  return final;
+}
+
+/**
  * @return []
  */
 function saveFlagProperties() {
@@ -181,8 +244,6 @@ function saveFlagProperties() {
   var valuesList = [];
   for (var flag in flags) {
     keysList.push(flag);
-    var a = flags[flag];
-    var f = flags[flag].join(splitters.SUBPROPERTY);
     valuesList.push(flags[flag].join(splitters.SUBPROPERTY));
   }
   var keyString = keysList.join(splitters.PROPERTY);
@@ -211,7 +272,7 @@ function getFlagProperties() {
 
       for (var j = 0; j < transactionPhraseList.length; j++) {
         var t = transactionPhraseList[j];
-        if(isEmpty(t) || isBlank(t)) continue;
+        if (isEmpty(t) || isBlank(t)) continue;
         transactionList.push(toTransaction(t));
       }
 

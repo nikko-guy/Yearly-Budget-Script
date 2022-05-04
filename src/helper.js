@@ -18,6 +18,22 @@ function checkIfDuplicate(transaction) {
 }
 
 /**
+ * @todo #1 make it work
+ * @param {String} val 
+ * @returns {String}
+ */
+function removeSplitters(val){
+  var text = val;
+  var chars = Object.values(splitters);
+  for(var c in chars){
+    while(text.indexOf(c)>0){
+      text = text.replace(c,'');
+    }
+  }
+  return text;
+}
+
+/**
  * @param {TransactionType} type either income or expense
  * @param {Number} month the month in int form, starting at 0
  */
@@ -75,6 +91,21 @@ function importReset() {
 function getEmptyRow(sheet, a1range = "D5:D", rowStart = 5) {
   var range = sheet.getRange(a1range);
   var vals = range.getValues()
+  var ct = 0;
+  var max = range.getLastRow() - rowStart;
+  while (vals[ct][0] != "" || range.getCell(ct + 1, 1).isPartOfMerge()) {
+    if (ct == max) break;
+    ct++;
+  }
+  return (ct + rowStart);
+}
+
+/**
+ * @param {Object[]} columnVals range to check
+ * @return {Number}
+ */
+ function getEmptyRow(columnVals) {
+  var vals = [columnVals];
   var ct = 0;
   var max = range.getLastRow() - rowStart;
   while (vals[ct][0] != "" || range.getCell(ct + 1, 1).isPartOfMerge()) {

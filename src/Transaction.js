@@ -39,9 +39,9 @@ function toTransaction(phrase) {
 }
 
 /**
- * @type {String} NAME
- * @type {SpreadSheetApp.Sheet} SHEET
- * @type {SpreadSheetApp.Sheet} CNSHEET
+ * @param {String} NAME
+ * @param {SpreadSheetApp.Sheet} SHEET
+ * @param {SpreadSheetApp.Sheet} CNSHEET
  */
 const TransactionType = {
   INCOME: {
@@ -57,7 +57,7 @@ const TransactionType = {
 }
 
 /**
- * @param {transactionType} type
+ * @param {TransactionType} type
  * @param {Number} row row to get transaction of
  */
 function getTransaction(type, row) {

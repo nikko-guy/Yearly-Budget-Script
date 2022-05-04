@@ -134,33 +134,9 @@ function addToFlagInteract(flag) {
 
   addToFlag(flag, transactionList);
 
-}
+  //TODO
+  //Reload Flags Sheet if current flag is the flag transactions were added to.
 
-/**
- * Handles button press for removeFromFlag
- * @param {String} flag Flag to remove transaction(s) from
- */
-function removeFromFlagInteract(flag) {
-  ui = SpreadsheetApp.getUi();
-  var sheet = spreadsheet.getActiveSheet();
-
-  //Make sure sheet is Valid
-  var sheetName = sheet.getName() == "Income Sheet" ? "Income" : sheet.getName() == "Expense Sheet" ? "Expense" : sheet.getName() == "Flagged Transactions" ? "Flagged" : null;
-  if (sheetName == null) {
-    log("Current sheet is not a valid sheet (Income/Expense Sheet, or Flags Page)");
-    ui.alert("This can only be used in the Income/Expense Sheet or Flags Page, please select a valid sheet and try again");
-    return;
-  }
-  log("Verified current sheet is valid");
-
-  //Make sure the cell is part of a transaction row
-  var cell = sheet.getActiveCell();
-  if (cell == null || cell.isPartOfMerge()) {
-    log("Selected cell is not part of a transaction row");
-    ui.alert("Please select a valid row");
-    return;
-  }
-  log("Verified selected cell is part of a transaction row");
 }
 
 /**
@@ -213,6 +189,44 @@ function addToFlag(flag, transactionList) {
   saveFlagProperties();
 
   return flags[flag];
+}
+
+/**
+ * Handles button press for createFlag
+ */
+function createFlagInteract(){
+  var ui = SpreadsheetApp.getUi();
+  var prompt = ui.prompt("Please enter a name for the flag",ui.ButtonSet.OK_CANCEL);
+
+  var button = prompt.getSelectedButton();
+  var response = prompt.getResponseText();
+
+  if(button== ui.Button.CANCEL||button==ui.Button.CLOSE){
+    log("User closed out of the dialogue, cancelled function");
+    return;
+  }
+
+  log("User entered: \""+response+"\"");
+
+  if(Object.keys(flags).indexOf(response)!=-1){
+    log("Flag with given name already exists, cancelled function.");
+    ui.alert("The name you provided is already a flag, please retry with a different name.");
+    return;
+  }
+
+  createFlag(response);
+  reloadFlagMenu();
+}
+
+/**
+ * Creates flag with given name
+ * @param {String} flag 
+ */
+function createFlag(flag){
+  if(!flags[flag]) return;
+
+  flags[flag] = [];
+  saveFlagProperties();
 }
 
 function reloadFlagMenu() {

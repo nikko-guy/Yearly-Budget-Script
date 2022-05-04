@@ -75,6 +75,9 @@ function onOpen() {
   reloadFlagMenu();
 }
 
+/**
+ * @todo #1 Remove splitter characters from imported data 
+ */
 function importData() {
   const importSheet = spreadsheet.getSheetByName("Import Data");
 
@@ -89,9 +92,9 @@ function importData() {
   
   var privacyList = {"i":[],"t":[]};
 
-  //create list of income and expense transactions
+  //create list of income and expense transactions while removing splitter characters
   for (var i = 0; i < vals.length; i++) {
-    //get data for transaction
+    //get data for transaction and sanitize data
     var date = vals[i][0];
     var amount = vals[i][2];
     var description = vals[i][1];

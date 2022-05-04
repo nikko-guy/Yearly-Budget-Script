@@ -4,6 +4,7 @@ var headerRows = {};
 var flags = {};
 var originalNames = {};
 var privacyTransactions = [];
+var categories = {};
 
 const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
 const spreadsheetID = spreadsheet.getId();
@@ -13,7 +14,17 @@ var normalText = SpreadsheetApp.newTextStyle().setBold(false).setFontFamily("Lat
   .setItalic(false).setStrikethrough(false).setUnderline(false).setBold(false).build();
 
 function run() {
-  saveInvoicePDF(generateInvoice(flags["test"]));
+  function f(type){
+    categories[type.NAME] = [];
+
+    var sheet = spreadsheet.getSheetByName(type.NAME+"List");
+    var lastColumn = sheet.getLastColumn();
+    var lastRow = sheet.getLastRow();
+
+    var vals = sheet.getRange(1,1,lastRow-1,lastColumn-1).getValues();
+    debugger;
+  }
+  f(TransactionType.INCOME)
   debugger;
 }
 

@@ -85,6 +85,46 @@ function reloadCommonNames() {
   return commonNames;
 }
 
+/**
+ * Reloads and saves categories
+ */
+function reloadCategories(){
+  categories = {};
+
+  /**
+   * @param {TransactionType} type 
+   */
+  function f(type){
+    categories[type.NAME] = [];
+
+    var list = [];
+
+    var sheet = spreadsheet.getSheetByName(type.NAME+"Categories");
+    var lastRow = getEmptyRow(sheet,"A1:A",1)-1;
+
+    var vals = sheet.getRange("A1:B"+lastRow).getValues();
+
+    for(var i in vals){
+      var val = vals[i];
+      var name = val[0];
+      var subcategories = val[1].split(',');
+
+      var category = new Category(name,type,subcategories);
+
+      list.push(category);
+    }
+
+    categories[type.NAME] = list;
+  }
+  log("Reloading Categories");
+  f(TransactionType.INCOME);
+  f(TransactionType.EXPENSE);
+  log("Successfully reloaded Categories");
+
+  saveCategoryProperties();
+  return categories;
+}
+
 function reloadFlags() {
   flags = {};
   log("Reloading Flags");
