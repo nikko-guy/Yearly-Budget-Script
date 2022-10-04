@@ -26,7 +26,7 @@ function removeSplitters(val){
   var text = val;
   var chars = Object.values(splitters);
   for(var c in chars){
-    while(text.indexOf(c)>0){
+    while(text.indexOf(c)!=-1){
       text = text.replace(c,'');
     }
   }

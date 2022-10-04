@@ -47,12 +47,14 @@ const TransactionType = {
   INCOME: {
     NAME: "Income",
     SHEET: spreadsheet.getSheetByName("Income Sheet"),
-    CNSHEET: spreadsheet.getSheetByName("Income Common Names")
+    CNSHEET: spreadsheet.getSheetByName("Income Common Names"),
+    CATSHEET: spreadsheet.getSheetByName("Income Categories")
   },
   EXPENSE: {
     NAME: "Expense",
     SHEET: spreadsheet.getSheetByName("Expense Sheet"),
-    CNSHEET: spreadsheet.getSheetByName("Expense Common Names")
+    CNSHEET: spreadsheet.getSheetByName("Expense Common Names"),
+    CATSHEET: spreadsheet.getSheetByName("Expense Categories")
   }
 }
 

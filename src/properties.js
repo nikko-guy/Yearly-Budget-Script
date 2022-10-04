@@ -45,18 +45,25 @@ const splitters = {
   SUBCATEGORY: 'Λ'
 }
 
+/**
+ * reloads all global vars from cloud storage
+ */
 function loadServices() {
-  log("Beginning load from PropertiesService...");
+  log("Loading global vars from PropertiesService...");
 
-  headerRows = getHeaderRowProperties();
-  commonNames = getCommonNameProperties();
-  transactions = getTransactionProperties();
-  flags = getFlagProperties();
+  var properties = getServices();
 
-  log("Load complete");
+  headerRows = properties.headerRows;
+  commonNames = properties.commonNames;
+  transactions = properties.transactions;
+  flags = properties.flags;
+  categories = properties.categories;
+
+  log("Successfully loaded all global vars");
 }
 
 /**
+ * Retrieves all saved properties from cloud storage
  * @return {}
  */
 function getServices() {
@@ -66,10 +73,13 @@ function getServices() {
   var transactions = getTransactionProperties();
   var flags = getFlagProperties();
   var categories = getCategoryProperties();
-  log("Load complete");
-  return { "headerRows": headerRows, "commonNames": commonNames, "transactions": transactions, "flags": flags };
+  log("Successfully loaded all properties");
+  return { "headerRows": headerRows, "commonNames": commonNames, "transactions": transactions, "flags": flags, "categories": categories };
 }
 
+/**
+ * Saves all values to permanent cloud storage
+ */
 function saveServices() {
   reloadAll();
   log("Beginning save to PropertiesService...")
@@ -82,7 +92,7 @@ function saveServices() {
 }
 
 /**
- * 
+ * Saves common name data to cloud storage
  */
 function saveCommonNameProperties() {
   log("Saving Common Names to PropertiesService");
@@ -105,7 +115,8 @@ function saveCommonNameProperties() {
 }
 
 /**
- * @return {}
+ * Returns common name data from cloud storage
+ * @return {} 
  */
 function getCommonNameProperties() {
   log("Loading CommonNames from PropertiesService");

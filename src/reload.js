@@ -99,7 +99,7 @@ function reloadCategories(){
 
     var list = [];
 
-    var sheet = spreadsheet.getSheetByName(type.NAME+"Categories");
+    var sheet = type.CATSHEET;
     var lastRow = getEmptyRow(sheet,"A1:A",1)-1;
 
     var vals = sheet.getRange("A1:B"+lastRow).getValues();
