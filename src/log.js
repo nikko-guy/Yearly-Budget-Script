@@ -10,6 +10,7 @@ function debug() {
 }
 
 function log() {
+  if(!debugInConsole) return;
   var args = arguments;
   var caller = log.caller.name;
   var write = true;
@@ -25,7 +26,7 @@ function log() {
 
   console.log(message);
   message = override ? "OVERRIDE: " : "" + caller + "(): " + args[0];
-  debugSheet.getRange("A" + logEmptyRow).setValue(Utilities.formatDate(new Date(),GMT,"H:m:ss.SSS")+" GMT");
+  debugSheet.getRange("A" + logEmptyRow).setValue(Utilities.formatDate(new Date(),"GMT","H:m:ss.SSS")+" GMT");
   debugSheet.getRange("B" + logEmptyRow).setValue(caller);
   debugSheet.getRange("C" + logEmptyRow).setValue(args[0]);
   logEmptyRow++;

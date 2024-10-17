@@ -156,7 +156,14 @@ function addCommonNames(type, transactionList) {
     var commonName = commonNames[type.NAME]['NAME'][simplifyBankName(transaction.description)]
     if (typeof commonName == "undefined") {
       //Create new CommonName if it doesn't exist
-      commonName = new CommonNameObject(simplifyBankName(transactionList[i].description), [transactionList[i].uuid]);
+
+      if(transaction.description.toLowerCase().indexOf("zelle")!=-1){
+        var name = simplifyBankName(transactionList[i].description);
+        if(type.NAME=="Income") commonName = new CommonNameObject(name, [transactionList[i].uuid],name,"Banking","Friends Payment");
+        else commonName = new CommonNameObject(name, [transactionList[i].uuid],name,"Banking","Friends Payment");
+      }
+
+      else commonName = new CommonNameObject(simplifyBankName(transactionList[i].description), [transactionList[i].uuid]);
       commonNames[type.NAME]['NAME'][commonName.bankName] = commonName;
       commonNames[type.NAME]['UUID'][commonName.uuid] = commonName;
     }
@@ -173,7 +180,7 @@ function addCommonNames(type, transactionList) {
   var valsToAdd = [];
   for (const key in commonNames[type.NAME]['NAME']) {
     var obj = commonNames[type.NAME]['NAME'][key];
-    var list = [obj.bankName, obj.commonName, obj.category, obj.subcategory, obj.uuid, obj.transactionUuids.join(",")];
+    var list = [obj.bankName, obj.commonName, obj.category, obj.subcat, obj.uuid, obj.transactionUuids.join(",")];
     valsToAdd.push(list);
   }
   //Reload ENTIRE CNSheet

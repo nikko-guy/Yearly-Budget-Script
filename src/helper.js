@@ -61,6 +61,7 @@ function addRows(sheet, n, start = null) {
   if (lastRow < endRow) sheet.insertRowsAfter(lastRow, endRow - lastRow);
   else if (lastRow > endRow) sheet.deleteRows(endRow + 1, lastRow - endRow);
 
+  log("Rows Added: "+startRow + ":" + endRow);
   return sheet.getRange(startRow + ":" + endRow);
 }
 
@@ -68,11 +69,26 @@ function addRows(sheet, n, start = null) {
  * @param {String} bankName Text to simplify
  */
 function simplifyBankName(bankName) {
+  var final = "";
   var toCut = bankName.indexOf("  ");
   if (toCut != -1) {
-    return bankName.substring(0, toCut);
+    final =  bankName.substring(0, toCut);
   }
-  else return bankName;
+  else final = bankName;
+
+  //Simplify zelle transactions
+  if(final.toLowerCase().indexOf("zelle")!=-1){
+    final = "Zelle - ";
+    var substrBeg
+    if(bankName.indexOf("to")!=-1){
+      substrBeg=bankName.indexOf("to")+3;
+    }
+    else substrBeg=bankName.indexOf("from")+5;
+    var substrEnd = bankName.lastIndexOf(" ");
+    final+=bankName.substring(substrBeg,substrEnd);
+  }
+
+  return final
 }
 
 function importReset() {
@@ -104,7 +120,7 @@ function getEmptyRow(sheet, a1range = "D5:D", rowStart = 5) {
  * @param {Object[]} columnVals range to check
  * @return {Number}
  */
- function getEmptyRow(columnVals) {
+ function getEmptyRowByColumn(columnVals) {
   var vals = [columnVals];
   var ct = 0;
   var max = range.getLastRow() - rowStart;
@@ -145,7 +161,7 @@ function getExecuteTime(func, n) {
     sum += (end - start);
   }
   log(times);
-  return "Average time for function " + func.name + ": " + sum / times.length + " ms";
+  log("Average time for function " + func.name + ": " + sum / times.length + " ms"+"\nTotal runtime to execute function "+n+" times: "+ sum/1000+" s", true);
 }
 
 /**

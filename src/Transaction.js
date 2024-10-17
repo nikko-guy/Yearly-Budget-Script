@@ -120,15 +120,16 @@ function addTransactionsByMonth(type, month, transactionList) {
   if (type == TransactionType.INCOME) templateSheetName = "IncomeList";
   else templateSheetName = "ExpenseList";
 
+  var range = sheet.getRange("B" + topRow + ":H" + lastRow);
   spreadsheet.getSheetByName(templateSheetName).getRange("D22:L22").copyTo(sheet.getRange(topRow + ":" + lastRow));
+  range.setValues(valsArray);
+
+  if(month!=11) lastRow = headerRows[type.NAME][month+1]-1;
+  else lastRow = sheet.getMaxRows();
+  
   sheet.getRange("B" + topRow + ":B" + lastRow).setFontColor("white");
   sheet.getRange("H" + topRow + ":H" + lastRow).setFontColor("white");
-  sheet.getRange("C" + topRow + ":G" + lastRow).setBorder(true, false, true, false, false, false, "#cccccc", SpreadsheetApp.BorderStyle.DOTTED);
-
-  var range = sheet.getRange("B" + topRow + ":H" + lastRow);
-  range.setValues(valsArray);
-  range = sheet.getRange(topRow + ":" + lastRow);
-  range.sort([3, 4]);
+  sheet.getRange("C" + topRow + ":G" + lastRow).setBorder(false, false, false, false, false, false, "#cccccc", SpreadsheetApp.BorderStyle.DOTTED);
 
   try {
     sheet.getRangeList(rangesToHighlight).setBackground("red");
@@ -136,6 +137,10 @@ function addTransactionsByMonth(type, month, transactionList) {
   catch (error) {
     log("There were no ranges to highlight red");
   }
+
+  range = sheet.getRange(topRow + ":" + lastRow);
+  range.sort([3, 4]);
+
 }
 
 /**

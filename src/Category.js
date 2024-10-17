@@ -9,7 +9,7 @@ const Category = function (name, type, subcategories = ["Other"]) {
     this.type = type;
     this.subcategories = subcategories;
     this.toString = function () {
-        return [name, type, subcategories != [] ? subcategories.join(splitters.SUBCATEGORY) : ""].join(splitters.CATEGORY);
+        return [name, type.NAME, subcategories != [] ? subcategories.join(splitters.SUBCATEGORY) : ""].join(splitters.CATEGORY);
     }
 }
 
@@ -20,6 +20,7 @@ const Category = function (name, type, subcategories = ["Other"]) {
  */
 function toCategory(string) {
     var list = string.split(splitters.CATEGORY);
+    list[1] = list[1] == "Income" ? TransactionType.INCOME : TransactionType.EXPENSE;
     var subcats = list[2];
     list[2] = !(subcats.length == 1 && (isEmpty(subcats[0]) || isBlank(subcats[0]))) ? list[2].split(splitters.SUBCATEGORY) : [];
     return new Category(list[0], list[1], list[2]);
@@ -35,7 +36,7 @@ function createCategoryInteract() {
 
 /**
  * creates a new category in the spreadsheet
- * @todo write function
+ * @todo finish function
  * @param {String} name 
  * @param {TransactionType} type either Income or Expense
  */
@@ -66,6 +67,9 @@ function addSubcategoryInteract() {
  */
 function addSubcategory(categoryName, type, name) {
 
+
+    //reload entire category list in spreadsheet in alphabetical order
+    updateCategorySheet(type);
 }
 
 /**
@@ -88,6 +92,7 @@ function updateCategorySheet(type){
     //set and sort values
     addRows(sheet,length).setValues(vals).sort(1);
 
+    //TODO
     //Update Summary Sheet
     sheet = spreadsheet.getSheetByName(type.NAME + " Summary");
 

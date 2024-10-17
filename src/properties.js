@@ -240,8 +240,8 @@ function getCategoryProperties() {
     log("Loaded Categories from PropertiesService");
   }
   catch (e) {
-    log("Failed to load Categories from PropertiesService", true);
-    log(e.stack, true);
+    log("Failed to load Categories from PropertiesService, loading from local spreadsheet", true);
+    final = reloadCategories();
   }
   return final;
 }

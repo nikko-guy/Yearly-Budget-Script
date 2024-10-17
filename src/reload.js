@@ -41,6 +41,7 @@ function reloadTransactions() {
     }
   }
   reloadHeaderRows();
+  reloadCategories();
   reloadCommonNames();
   log("Reloading Transactions");
   f(TransactionType.INCOME);
@@ -99,10 +100,10 @@ function reloadCategories(){
 
     var list = [];
 
-    var sheet = type.CATSHEET;
+    sheet = type.CATSHEET;
     var lastRow = getEmptyRow(sheet,"A1:A",1)-1;
 
-    var vals = sheet.getRange("A1:B"+lastRow).getValues();
+    var vals = sheet.getRange("A2:B"+lastRow).getValues();
 
     for(var i in vals){
       var val = vals[i];
@@ -199,10 +200,10 @@ function reloadPrivacyTransactions(){
   //Create and add each PrivacyTransactionObject to Array
   var vals = sheet.getRange("A2:C"+lastRow).getValues();
 
-  for(var i = vals.length-1;i>=0;i--){
+  for(var i = 0;i<vals.length;i++){
     var v = vals[i];
     privacyTransactions.push(new PrivacyTransactionObject(v[0],v[1],v[2]));
-    ptNameList.push([v[2]]);
+    ptNameList.push(v[2]);
   }
 
   log("Finished reloading Privacy Transactions");

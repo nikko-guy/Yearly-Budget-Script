@@ -22,6 +22,9 @@ function showTransactionsWithFlag(flag) {
 
   if (transactionList.length == 0) {
     log("There are no transactions with this flag!");
+    //Delete Blank rows
+    addRows(sheet,0);
+    
     return;
   }
   log("# of Transactions with flag: " + transactionList.length);
@@ -134,9 +137,9 @@ function addToFlagInteract(flag) {
 
   addToFlag(flag, transactionList);
 
-  //TODO
   //Reload Flags Sheet if current flag is the flag transactions were added to.
-
+  var currentFlag = spreadsheet.getSheetByName("Flagged Transactions").getRange("B2").getValue();
+  if(currentFlag==flag) showTransactionsWithFlag(flag);
 }
 
 /**
@@ -223,9 +226,14 @@ function createFlagInteract(){
  * @param {String} flag 
  */
 function createFlag(flag){
-  if(!flags[flag]) return;
+  if(flags[flag]) return;
 
   flags[flag] = [];
+
+  var sheet = spreadsheet.getSheetByName("FlagsList");
+
+  addRows(sheet,1).setValues([[flag,flags[flag]]]);
+
   saveFlagProperties();
 }
 
@@ -253,6 +261,15 @@ function reloadFlagMenu() {
     .addItem("Create Flag","createFlagInteract")
     .addItem("Delete Flag","deleteFlagInteract")
   flagMenu.addToUi();
+
+  var cell = spreadsheet.getSheetByName("Flagged Transactions").getRange("A2");
+  var choice = cell.getValue();
+  if (choice == "One Flag") {
+    var point = cell.offset(0, 1);
+    var items = Object.keys(flags);
+    var rule = SpreadsheetApp.newDataValidation().requireValueInList(items, true).build();
+    point.setDataValidation(rule);
+  }
 }
 
 function generateFlagFunctions() {

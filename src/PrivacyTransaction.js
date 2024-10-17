@@ -28,6 +28,8 @@ function getPrivacyNames(transactionList){
   }
 
   //Not Easy stuff
+
+  return [];
 }
 
 /**

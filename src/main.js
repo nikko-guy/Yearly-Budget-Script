@@ -1,42 +1,77 @@
-function debug(){
+function debug() {
   run();
 }
 
-function onEdit() {
-  const sheet = spreadsheet.getActiveSheet()
-  const cell = sheet.getActiveCell()
+function onSelectionChange(e){
+  const cell = e.range.getCell(1,1);
+  const val = cell.getValue();
+  const sheet = cell.getSheet();
+  const sheetname = sheet.getName();
+  
+  if(!val) return;
+  if (cell.getColumn() == 6 && (sheetname == "Income Sheet" || sheetname == "Expense Sheet")){
+    var type;
+    if (sheetname == "Income Sheet") type = TransactionType.INCOME;
+    else type = TransactionType.EXPENSE;
 
-  const expenseCategorySheet = spreadsheet.getSheetByName("ExpenseList")
-  const incomeCategorySheet = spreadsheet.getSheetByName("IncomeList")
-
-  log("User edited cell " + cell.getA1Notation() + " to: " + cell.getValue());
-
-  //category selection magic don't touch
-  if (cell.getColumn() == 6 && (sheet.getName() == "Income Sheet" || sheet.getName() == "Expense Sheet")) {
     const choice = cell.getValue()
-    var list
-    if (sheet.getName() == "Income Sheet") list = incomeCategorySheet
-    else list = expenseCategorySheet
-    list.getRange("B22").setValue(choice)
+    var items;
+
+    //Get Subcategories list
+    for (var i in categories[type.NAME]) {
+      var cat = categories[type.NAME][i];
+      if (cat.name == choice) items = cat.subcategories;
+    }
+
+    log(items);
 
     sheet.getRange("G:G").clearDataValidations()
 
     var point = cell.offset(0, 1)
-    var items = list.getRange("A22:A40")
-    var rule = SpreadsheetApp.newDataValidation().requireValueInRange(items, true).build()
+    var rule = SpreadsheetApp.newDataValidation().requireValueInList(items, true).build()
+    point.setDataValidation(rule)
+  }
+}
+
+function onEdit() {
+  const sheet = spreadsheet.getActiveSheet();
+  const sheetname = sheet.getName();
+  const cell = sheet.getActiveCell()
+
+  log("User edited cell " + cell.getA1Notation() + " to: " + cell.getValue());
+
+  //category selection magic don't touch
+  if (cell.getColumn() == 6 && (sheetname == "Income Sheet" || sheetname == "Expense Sheet")) {
+    var type;
+    if (sheetname == "Income Sheet") type = TransactionType.INCOME;
+    else type = TransactionType.EXPENSE;
+
+    const choice = cell.getValue()
+    var items;
+
+    //Get Subcategories list
+    for (var i in categories[type.NAME]) {
+      var cat = categories[type.NAME][i];
+      if (cat.name == choice) items = cat.subcategories;
+    }
+
+    log(items);
+
+    sheet.getRange("G:G").clearDataValidations()
+
+    var point = cell.offset(0, 1)
+    var rule = SpreadsheetApp.newDataValidation().requireValueInList(items, true).build()
     if (choice != "") point.setDataValidation(rule)
   }
 
   if (sheet.getName() == "Flagged Transactions") {
-    if (cell.getColumn() == 1) {
+    if (cell.getA1Notation() == "A2") {
       const choice = cell.getValue();
-      if (cell.getA1Notation() == "A2") {
+      if (choice == "One Flag") {
         var point = cell.offset(-1, 1);
         point.setValue("Flag to Show");
         point = point.offset(1, 0);
-        var s = spreadsheet.getSheetByName("FlagsList");
-        var row = getEmptyRow(s, "A1:A", 1) - 1;
-        var items = row > 1 ? s.getRange("A2:A" + row).getValues() : [];
+        var items = Object.keys(flags);
         var rule = SpreadsheetApp.newDataValidation().requireValueInList(items, true).build();
         point.setDataValidation(rule);
       }
@@ -51,9 +86,10 @@ function onEdit() {
     if (cell.getA1Notation() == "B2") {
       const choice = cell.getValue();
       var offset = cell.offset(0, -1);
-      log(offset.getA1Notation());
       if (offset.getValue() != "One Flag") {
-        log("Flag name exists when choice mode is not set to \"One Flag\"");
+        log("Flag name exists when choice mode is not set to \"One Flag\", clearing Data Validation");
+        cell.clearDataValidations();
+        cell.clear();
         return;
       }
       showTransactionsWithFlag(choice);
@@ -67,12 +103,12 @@ function onOpen() {
   //add a button to add common name to row
   var entries =
     [
-      { name: "Set up common name for selected row", functionName: "commonNameInteract" },
+      { name: "ReloadAll", functionName: "reloadAll" },
       { name: "Test", functionName: "test" }
     ];
-  spreadsheet.addMenu("Common Name", entries);
+  spreadsheet.addMenu("Misc", entries);
+  spreadsheet.addMenu("Common Name", [{ name: "Set up common name for selected row", functionName: "commonNameInteract" },]);
   spreadsheet.addMenu("Flag", [{ name: "Reload Flags", functionName: "reloadFlagMenu" }]);
-  reloadFlagMenu();
 }
 
 /**
@@ -81,6 +117,7 @@ function onOpen() {
 function importData() {
   const importSheet = spreadsheet.getSheetByName("Import Data");
 
+  addRows(importSheet,1);
   var eR = getEmptyRow(importSheet, "A7:A", 7);
   log("Empty row in import sheet is " + eR);
   reloadAll();
@@ -89,8 +126,8 @@ function importData() {
 
   var rawTArray = [];
   var rawValArray = [];
-  
-  var privacyList = {"i":[],"t":[]};
+
+  var privacyList = { "i": [], "t": [] };
 
   //create list of income and expense transactions while removing splitter characters
   for (var i = 0; i < vals.length; i++) {
@@ -106,7 +143,7 @@ function importData() {
     var t = new TransactionObject(date, amount, description, type);
 
     //Handle privacy.com transactions
-    if(description.toLowerCase().indexOf("privacy")!=-1){
+    if (description.toLowerCase().indexOf("privacy") != -1) {
       privacyList["i"].push(i);
       privacyList["t"].push(t);
     }
@@ -118,7 +155,7 @@ function importData() {
   //Apply privacy.com names to transactions
   var privacyNames = getPrivacyNames(privacyList["t"]);
 
-  for(var j=0;j<privacyNames.length;j++){
+  for (var j = 0; j < privacyNames.length; j++) {
     var description = privacyNames[j];
     var i = privacyList["i"][j];
     var t = rawTArray[i];
@@ -135,7 +172,7 @@ function importData() {
   var valsList = { 'Income': [], 'Expense': [] };
 
   //Sort transactions into type
-  for(var i=0;i<rawTArray.length;i++){
+  for (var i = 0; i < rawTArray.length; i++) {
     var t = rawTArray[i];
 
     var date = t.date;
@@ -159,6 +196,7 @@ function importData() {
 
   //put transactions in income and expense sections in the import sheet
   function pasteValues(type, firstRow) {
+    if(valsList[type.NAME].length==0) return;
     var range = importSheet.getRange("A" + firstRow + ":D" + (firstRow - 1 + valsList[type.NAME].length));
     var list = valsList[type.NAME];
     range.setValues(list);
@@ -166,13 +204,19 @@ function importData() {
   }
 
   var a = pasteValues(TransactionType.EXPENSE, 7);
-  var b = pasteValues(TransactionType.INCOME, a[0] + 1);
+  var b;
+  if(a) b = pasteValues(TransactionType.INCOME,a[0] + 1);
+  else b = pasteValues(TransactionType.INCOME,7);
 
-  ranges = [a[1], b[1]];
+  ranges = [];
+  if(a) ranges[0] = a[1];
+  else ranges[0] = undefined;
+  if(b) ranges[1] = b[1];
+  else ranges[1] = undefined;
 
   //sort transactions
-  ranges[0].sort([1, { column: 3, ascending: false }]);
-  ranges[1].sort([1, { column: 3, ascending: false }]);
+  if(ranges[0]) ranges[0].sort([1, { column: 3, ascending: false }]);
+  if(ranges[1]) ranges[1].sort([1, { column: 3, ascending: false }]);
 
   //add entire month of transactions under correct header
   //create empty array for transactions
@@ -186,7 +230,7 @@ function importData() {
   for (var i = 0; i < vals.length; i++) {
     //get data for transaction
     var date = vals[i][0];
-    var month = Number.parseInt(Utilities.formatDate(date,"GMT","M"))-1;
+    var month = Number.parseInt(Utilities.formatDate(date, "GMT", "M")) - 1;
     var amount = vals[i][2];
     var description = vals[i][1];
     var uuid = vals[i][3];
@@ -206,10 +250,9 @@ function importData() {
     addTransactionsByMonth(TransactionType.EXPENSE, i, transactionsByMonth[TransactionType.EXPENSE.NAME][i]);
   }
 
-  //TODO
   //Clear transactions from Import Sheet
-  ranges[0].clear();
-  ranges[1].clear();
+  if(ranges[0]) ranges[0].clear();
+  if(ranges[1]) ranges[1].clear();
 
   //reload and save Transactions
   reloadTransactions();

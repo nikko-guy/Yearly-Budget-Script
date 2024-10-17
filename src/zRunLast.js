@@ -1,2 +1,3 @@
 loadServices();
 generateFlagFunctions();
+reloadFlagMenu();
